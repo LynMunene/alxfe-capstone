@@ -5,7 +5,7 @@ import Menu from "./pages/Menu";
 function App() {
   return (
     <Router>
-      <div className="flex h-screen bg-[#1a1a1a] text-white">
+      <div className="flex h-screen bg-[#111315] text-white">
         {/* Sidebar */}
         <Sidebar />
         

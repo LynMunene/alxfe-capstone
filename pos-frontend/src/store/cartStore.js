@@ -1,79 +1,107 @@
 import { create } from "zustand";
 
-const useCartStore = create((set) => ({
-  // Hardcoded categories
-  categories: [
-    { id: 1, name: "Burgers", color: "#f88408" },
-    { id: 2, name: "Drinks", color: "#9fd6eb" },
-    { id: 3, name: "Desserts", color: "#ff416d" },
-    { id: 4, name: "Salads", color: "#82d155" },
-  ],
-
-  // Hardcoded orders (menu items)
-  orders: [
-    { id: 101, categoryId: 1, name: "Cheeseburger", price: 5.99 },
-    { id: 102, categoryId: 1, name: "Double Burger", price: 8.49 },
-    { id: 201, categoryId: 2, name: "Coca-Cola", price: 1.99 },
-    { id: 202, categoryId: 2, name: "Orange Juice", price: 2.49 },
-    { id: 301, categoryId: 3, name: "Chocolate Cake", price: 3.99 },
-    { id: 302, categoryId: 3, name: "Ice Cream", price: 2.99 },
-    { id: 401, categoryId: 4, name: "Caesar Salad", price: 4.49 },
-    { id: 402, categoryId: 4, name: "Greek Salad", price: 4.99 },
-  ],
-
+const useCartStore = create((set, get) => ({
   cart: [],
 
-  // Add an item to the cart
-  addToCart: (item) =>
+  // Add item to cart
+  addItem: (item) =>
     set((state) => {
-      const existingItem = state.cart.find((i) => i.id === item.id);
-      if (existingItem) {
+      const existing = state.cart.find((i) => i.id === item.id);
+      
+      if (existing) {
+        // Item exists - increase quantity and update total price
         return {
           cart: state.cart.map((i) =>
-            i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+            i.id === item.id
+              ? { 
+                  ...i, 
+                  quantity: i.quantity + 1,
+                  totalPrice: (i.quantity + 1) * i.unitPrice
+                }
+              : i
           ),
         };
       }
-      return { cart: [...state.cart, { ...item, quantity: 1 }] };
+      
+      // New item - add with initial quantity and calculate total price
+      return { 
+        cart: [...state.cart, { 
+          ...item, 
+          unitPrice: item.price, // Store original unit price
+          quantity: item.quantity || 1,
+          totalPrice: item.price * (item.quantity || 1) // Calculate total
+        }] 
+      };
     }),
 
-  // Remove an item from the cart
-  removeFromCart: (id) =>
-    set((state) => ({
-      cart: state.cart.filter((item) => item.id !== id),
-    })),
-
-  // Increase quantity
-  increaseQuantity: (id) =>
+  // Increase item quantity
+  increaseItem: (id) =>
     set((state) => ({
       cart: state.cart.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        item.id === id 
+          ? { 
+              ...item, 
+              quantity: item.quantity + 1,
+              totalPrice: (item.quantity + 1) * (item.unitPrice || item.price)
+            } 
+          : item
       ),
     })),
 
-  // Decrease quantity
-  decreaseQuantity: (id) =>
+  // Decrease item quantity
+  decreaseItem: (id) =>
     set((state) => ({
       cart: state.cart
         .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(item.quantity - 1, 1) }
+          item.id === id 
+            ? { 
+                ...item, 
+                quantity: item.quantity - 1,
+                totalPrice: (item.quantity - 1) * (item.unitPrice || item.price)
+              } 
             : item
         )
         .filter((item) => item.quantity > 0),
     })),
 
+  // Remove item
+  removeItem: (id) =>
+    set((state) => ({
+      cart: state.cart.filter((item) => item.id !== id),
+    })),
+
   // Clear cart
   clearCart: () => set({ cart: [] }),
 
-  // Calculate total price
-  getTotalPrice: () =>
-    set((state) => ({
-      total: state.cart.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0
-      ),
-    })),
+  // Get cart total (sum of all item total prices)
+  getCartTotal: () => {
+    const { cart } = get();
+    return cart.reduce((total, item) => total + item.totalPrice, 0);
+  },
+
+  // Get item count
+  getItemCount: () => {
+    const { cart } = get();
+    return cart.reduce((count, item) => count + item.quantity, 0);
+  },
+
+  // Place order
+  placeOrder: () =>
+    set((state) => {
+      if (state.cart.length === 0) {
+        alert("Your cart is empty!");
+        return state;
+      }
+      
+      // Calculate order totals
+      const subtotal = state.cart.reduce((sum, item) => sum + item.totalPrice, 0);
+      const tax = subtotal * 0.16; // 16% tax
+      const total = subtotal + tax;
+      
+      alert(`✅ Order placed successfully!\nSubtotal: $${subtotal.toFixed(2)}\nTax: $${tax.toFixed(2)}\nTotal: $${total.toFixed(2)}`);
+      
+      return { cart: [] };
+    })
 }));
 
 export default useCartStore;
