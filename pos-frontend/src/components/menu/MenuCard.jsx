@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { menus } from "../../constants";
 import { GrRadialSelected } from "react-icons/gr";
 import { FaShoppingCart } from "react-icons/fa";
-import useCartStore from "../../store/cartStore";
+import useCartStore from "../../store/useCartStore";
 
 const MenuCard = () => {
   const [selected, setSelected] = useState(menus[0]);

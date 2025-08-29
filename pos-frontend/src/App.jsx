@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Menu from "./pages/Menu";
+import Orders from "./pages/Orders";
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-6">
           <Routes>
-            <Route path="/menu" element={<Menu />} />
+            <Route path="/" element={<Menu />} />
+            <Route path ="/orders" element= {<Orders />}/>
 
             
             {/* Optional: 404 page */}

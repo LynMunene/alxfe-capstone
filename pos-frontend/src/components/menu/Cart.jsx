@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { IoIosRemove } from "react-icons/io";
 import { IoAdd } from "react-icons/io5";
-import useCartStore from "../../store/cartStore";
+import useCartStore from "../../store/useCartStore";
 
 const Cart = () => {
   const cartData = useCartStore((state) => state.cart);
